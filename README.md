@@ -102,6 +102,8 @@ src/
 
 > 3- Two HTTP mechanisms are used intentionally. **Axios** (`src/lib/axios.ts`) handles all client-side requests and provides request/response interceptors, automatic auth-header injection, and silent token refresh on 401. **Native `fetch`** is used in server-side (RSC) service files via the `src/lib/serverFetch.ts` wrapper because Axios does not support Next.js's extended `fetch` options (`next.revalidate`, `next.tags`) required for ISR/RSC caching. Raw `fetch` calls are never left inline — `serverFetch` centralises error handling and cache configuration.
 
+> 4- Since the color and product specification data on the product detail page did not come from dummyjson, static data was used for all products here.
+
 ---
 
 ## Getting Started
@@ -112,6 +114,18 @@ src/
 - **npm** ≥ 9
 - **Docker** (optional, for containerized setup)
 
+### Clone Repository
+
+```bash
+# 1. Clone repository
+git clone https://github.com/koksalenes/case-octopus.git
+```
+
+```bash
+# 2. Navigate project directory
+cd case-octopus
+```
+
 ### Environment Variables
 
 Create a `.env.local` file in the project root and copy the contents of `.env.example`.
@@ -121,7 +135,7 @@ If you need to make changes to the environment variables, do so.
 
 ---
 
-### Running Locally (Without Docker)
+### Running Without Docker
 
 #### Development
 

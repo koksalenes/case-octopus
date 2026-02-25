@@ -1,1 +1,5 @@
-export { fetchCategories, fetchProducts } from './product.service';
+export {
+  fetchCategories,
+  fetchProductById,
+  fetchProducts,
+} from './product.service';

@@ -33,7 +33,7 @@ export function AppBar() {
 
   return (
     <header className="border-border-light sticky top-0 z-50 w-full border-b bg-white">
-      <div className="mx-auto flex h-14 max-w-360 items-center justify-between px-4 md:h-23 md:px-8">
+      <div className="mx-auto flex h-14 max-w-360 items-center justify-between px-4 md:h-16 md:px-8">
         <div className={searchOpen ? 'hidden md:block' : ''}>
           <Logo />
         </div>

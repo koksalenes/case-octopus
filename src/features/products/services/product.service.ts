@@ -86,6 +86,10 @@ export async function fetchProducts(
   return fetchFromUrl(`${productsBaseUrl}?limit=${limit}&skip=${skip}`);
 }
 
+export async function fetchProductById(id: string): Promise<Product> {
+  return serverFetch<Product>(`${productsBaseUrl}/${id}`, CACHE_OPTIONS);
+}
+
 export async function fetchCategories(): Promise<string[]> {
   return serverFetch<string[]>(
     `${env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.PRODUCTS.CATEGORY_LIST}`,
