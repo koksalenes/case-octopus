@@ -1,36 +1,196 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <img src="public/assets/logos/logo-full.svg" alt="Octopus Logo" width="320" />
+</p>
+
+<h1 align="center">Octopus Frontend Case</h1>
+
+<p align="center">
+  A modern e-commerce front-end application built as a technical case study for <strong>Octopus Digital Signage</strong>.
+  <br />
+</p>
+
+<br />
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16.1.6-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19.2.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+</p>
+
+<br />
+
+---
+
+## Table of Contents
+
+- [About](#about)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Developer Notes](#developer-notes)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Environment Variables](#environment-variables)
+  - [Running Locally (Without Docker)](#running-locally-without-docker)
+  - [Running with Docker](#running-with-docker)
+- [Code Quality](#code-quality)
+- [License](#license)
+
+---
+
+## About
+
+**Octopus Case** is a front-end e-commerce application developed as a technical evaluation case study for Octopus Digital Signage. The app covers three core user-facing experiences:
+
+- **Login & Session Management** — Users authenticate with their credentials through a clean login page. Access tokens and refresh tokens are stored and managed automatically, keeping the user's session alive seamlessly across page reloads.
+
+- **Product Listing** — Product page showcasing the full catalogue. Products can be narrowed down by **category** using a filter panel or by **keyword** using the search bar, making it easy to find exactly what's needed.
+
+- **Product Detail** — Clicking on any product opens a dedicated detail page displaying all relevant information about that images, description, pricing, and more.
+
+---
+
+## Tech Stack
+
+| Category              | Technology                       |
+| --------------------- | -------------------------------- |
+| **Framework**         | Next.js + React                  |
+| **Language**          | TypeScript                       |
+| **Styling**           | Tailwind CSS                     |
+| **State Management**  | Redux Toolkit                    |
+| **HTTP Client**       | Axios                            |
+| **Schema Validation** | Zod                              |
+| **Linting**           | ESLint                           |
+| **Formatting**        | Prettier                         |
+| **Git Hooks**         | Husky + lint-staged + Commitlint |
+| **Containerization**  | Docker                           |
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── .../page.tsx         # Login page
+│   ├── globals.css         # Global styles
+├── components/ui/          # Shared reusable UI components (Button, Spinner, etc.)
+├── config/                 # Environment config & validation (Zod schemas)
+├── constants/              # Constants
+├── features/               # Feature-based modules
+│   └── auth/               # Authentication feature
+│       ├── components/     # Login form, hero, password input etc.
+│       ├── constants/      # Auth-specific constants
+│       ├── services/       # Auth API service layer
+│       ├── store/          # Auth Redux slice
+│       └── types/          # Auth TypeScript types
+│   └── .../                # Other features
+├── lib/                    # Core utilities (Axios client, interceptors, logger, token storage etc.)
+├── store/                  # Redux store configuration, hooks, StoreProvider etc.
+└── types/                  # Shared TypeScript types
+```
+
+---
+
+## Developer Notes
+
+> 1- Normally, the Figma design submitted for the case study retrieves the email address, but since the dummyjson API uses a username for login, I changed this part from email address to username.
+
+> 2- Because the CORS setting is set to "\*" for public access to the dummyjson API, requests cannot be made with credentials = true. The API side also cannot add the cookie using `set-cookie` for this reason. Normally, the refresh token should be stored in a cookie for security reasons, but since we don't have backend control, we can't change the CORS setting, so I stored the refresh token on local storage.
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- **Node.js** ≥ 20
+- **npm** ≥ 9
+- **Docker** (optional, for containerized setup)
+
+### Environment Variables
+
+Create a `.env.local` file in the project root and copy the contents of `.env.example`.
+If you need to make changes to the environment variables, do so.
+
+> Environment variables are validated at startup via Zod. The app will fail fast with descriptive error messages if any required variable is missing or invalid.
+
+---
+
+### Running Locally (Without Docker)
+
+#### Development
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be available at **http://localhost:3000**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 1. Install dependencies
+npm install
 
-## Learn More
+# 2. Build the production bundle
+npm run build
 
-To learn more about Next.js, take a look at the following resources:
+# 3. Start the production server
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The app will be available at **http://localhost:3000**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+### Running with Docker
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The project includes a multi-stage Dockerfile with separate **development** and **production** targets.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+#### Development
+
+```bash
+# Build the development image
+docker build --target development -t octopus-case:dev .
+
+# Run the development container
+docker run -p 3000:3000 --env-file .env.local octopus-case:dev
+```
+
+The app will be available at **http://localhost:3000**.
+
+#### Production
+
+```bash
+# Build the production image
+docker build --target production -t octopus-case:prod .
+
+# Run the production container
+docker run -p 3000:3000 --env-file .env.local octopus-case:prod
+```
+
+The app will be available at **http://localhost:3000**.
+
+---
+
+## Code Quality
+
+This project enforces strict code quality standards through an automated toolchain:
+
+- **ESLint** — Configured with Next.js Core Web Vitals, TypeScript, and Prettier compatibility rules.
+- **Prettier** — Automatic code formatting with Tailwind CSS class sorting plugin.
+- **Husky + lint-staged** — Pre-commit hooks that lint and format staged files automatically.
+- **Commitlint** — Enforces conventional commits specification on every commit message.
+
+---
+
+## License
+
+Copyright © 2026 **Enes Köksal** & **Octopus Digital Signage**
+
+This project is a technical evaluation case study. See the [LICENSE](LICENSE) file for details.
