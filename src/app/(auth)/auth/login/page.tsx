@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { LoginForm, LoginHero } from '@/features/auth';
 
 export const metadata: Metadata = {
-  title: 'Login | Octopus',
+  title: 'Login',
   description: 'Login to your Octopus account',
 };
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
       <div className="bg-surface-page hidden w-full flex-col px-6 py-8 lg:flex lg:w-[57.29%] lg:px-10 lg:py-10">
         {/* Logo */}
         <div className="mb-8 lg:mb-0">
-          <Link href="/">
+          <Link href="/products">
             <Image
               src="/assets/logos/logo-full.svg"
               alt="Octopus Logo"
@@ -39,7 +39,7 @@ export default function LoginPage() {
         <div className="flex w-full max-w-108 flex-col items-center gap-8">
           {/* Mobile-only logo */}
           <div className="block lg:hidden">
-            <Link href="/">
+            <Link href="/products">
               <Image
                 src="/assets/logos/logo-full.svg"
                 alt="Octopus Logo"

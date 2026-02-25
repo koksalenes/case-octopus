@@ -42,7 +42,7 @@ export default function LoginForm() {
     const result = await dispatch(login({ username, password }));
 
     if (login.fulfilled.match(result)) {
-      router.push('/');
+      router.push('/products');
     }
   };
 

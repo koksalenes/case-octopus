@@ -54,18 +54,18 @@
 
 ## Tech Stack
 
-| Category              | Technology                       |
-| --------------------- | -------------------------------- |
-| **Framework**         | Next.js + React                  |
-| **Language**          | TypeScript                       |
-| **Styling**           | Tailwind CSS                     |
-| **State Management**  | Redux Toolkit                    |
-| **HTTP Client**       | Axios                            |
-| **Schema Validation** | Zod                              |
-| **Linting**           | ESLint                           |
-| **Formatting**        | Prettier                         |
-| **Git Hooks**         | Husky + lint-staged + Commitlint |
-| **Containerization**  | Docker                           |
+| Category              | Technology                                         |
+| --------------------- | -------------------------------------------------- |
+| **Framework**         | Next.js + React                                    |
+| **Language**          | TypeScript                                         |
+| **Styling**           | Tailwind CSS                                       |
+| **State Management**  | Redux Toolkit                                      |
+| **HTTP Client**       | Axios (client-side) · native `fetch` (server-side) |
+| **Schema Validation** | Zod                                                |
+| **Linting**           | ESLint                                             |
+| **Formatting**        | Prettier                                           |
+| **Git Hooks**         | Husky + lint-staged + Commitlint                   |
+| **Containerization**  | Docker                                             |
 
 ---
 
@@ -87,7 +87,7 @@ src/
 │       ├── store/          # Auth Redux slice
 │       └── types/          # Auth TypeScript types
 │   └── .../                # Other features
-├── lib/                    # Core utilities (Axios client, interceptors, logger, token storage etc.)
+├── lib/                    # Core utilities (Axios client, interceptors, serverFetch, logger, token storage etc.)
 ├── store/                  # Redux store configuration, hooks, StoreProvider etc.
 └── types/                  # Shared TypeScript types
 ```
@@ -99,6 +99,8 @@ src/
 > 1- Normally, the Figma design submitted for the case study retrieves the email address, but since the dummyjson API uses a username for login, I changed this part from email address to username.
 
 > 2- Because the CORS setting is set to "\*" for public access to the dummyjson API, requests cannot be made with credentials = true. The API side also cannot add the cookie using `set-cookie` for this reason. Normally, the refresh token should be stored in a cookie for security reasons, but since we don't have backend control, we can't change the CORS setting, so I stored the refresh token on local storage.
+
+> 3- Two HTTP mechanisms are used intentionally. **Axios** (`src/lib/axios.ts`) handles all client-side requests and provides request/response interceptors, automatic auth-header injection, and silent token refresh on 401. **Native `fetch`** is used in server-side (RSC) service files via the `src/lib/serverFetch.ts` wrapper because Axios does not support Next.js's extended `fetch` options (`next.revalidate`, `next.tags`) required for ISR/RSC caching. Raw `fetch` calls are never left inline — `serverFetch` centralises error handling and cache configuration.
 
 ---
 

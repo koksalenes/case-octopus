@@ -4,4 +4,10 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refresh',
     ME: '/auth/me',
   },
+  PRODUCTS: {
+    BASE: '/products',
+    SEARCH: '/products/search',
+    CATEGORY_BASE: '/products/category',
+    CATEGORY_LIST: '/products/category-list',
+  },
 } as const;

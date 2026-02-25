@@ -14,4 +14,16 @@
   --color-border-light: #e2e8f0;
   --color-surface-input: #f1f5f9;
   --color-surface-page: #f8fafc;
+
+  --font-heading: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Hide scrollbar globally */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
