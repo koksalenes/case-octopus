@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 <p align="center">
   <img src="public/assets/logos/logo-full.svg" alt="Octopus Logo" width="320" />
 </p>
@@ -194,3 +196,10 @@ This project enforces strict code quality standards through an automated toolcha
 Copyright © 2026 **Enes Köksal** & **Octopus Digital Signage**
 
 This project is a technical evaluation case study. See the [LICENSE](LICENSE) file for details.
+
+<br>
+<p align="center">
+  <a href="#top">
+    <img src="https://img.shields.io/badge/BACK_TO_TOP-↑-000000?style=for-the-badge" alt="Back to Top" />
+  </a>
+</p>

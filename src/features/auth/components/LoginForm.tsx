@@ -129,7 +129,7 @@ export default function LoginForm() {
           {rememberMe && (
             <Image
               src="/assets/icons/check.svg"
-              alt=""
+              alt="Check Icon"
               width={12}
               height={12}
             />
