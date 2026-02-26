@@ -45,12 +45,24 @@
 **Octopus Case** is a front-end e-commerce application developed as a technical evaluation case study for Octopus Digital Signage. The app covers three core user-facing experiences:
 
 - **Login & Session Management** — Users authenticate with their credentials through a clean login page. Access tokens and refresh tokens are stored and managed automatically, keeping the user's session alive seamlessly across page reloads.
+<p align="center">
+<img src="docs/images/login.png" alt="Login Page" width="800" />
+</p>
 
 - **Product Listing** — Product page showcasing the full catalogue. Products can be narrowed down by **category** using a filter panel or by **keyword** using the search bar, making it easy to find exactly what's needed.
+<p align="center">
+<img src="docs/images/product-list.png" alt="Product List Page" width="800" />
+</p>
 
 - **Product Detail** — Clicking on any product opens a dedicated detail page displaying all relevant information about that images, description, pricing, and more.
+<p align="center">
+<img src="docs/images/product-details.png" alt="Product Details Page" width="800" />
+</p>
 
 - **Shopping Cart** — Features a simulated shopping cart functionality where users can add products to their cart, view added items, and experience a mock shopping flow.
+<p align="center">
+<img src="docs/images/cart.png" alt="Cart Menu" width="800" />
+</p>
 
 ---
 
