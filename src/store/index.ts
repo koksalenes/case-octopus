@@ -1,12 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import { authReducer } from '@/features/auth';
+import { cartReducer } from '@/features/cart';
 import { setupInterceptors } from '@/lib/setupInterceptors';
 import { tokenStorage } from '@/lib/tokenStorage';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    cart: cartReducer,
   },
 });
 

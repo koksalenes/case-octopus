@@ -104,6 +104,8 @@ src/
 
 > 4- Since the color and product specification data on the product detail page did not come from dummyjson, static data was used for all products here.
 
+> 5- To simulate the shopping cart using dummyjson, I simulated adding items to cart number 1 in the dummyjson. However, because we can't update the data via API, some items in the cart appear static, and only the last item we added changes. Since we don't have API access, I created this entirely as a simulation.
+
 ---
 
 ## Getting Started

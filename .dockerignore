@@ -2,6 +2,7 @@ node_modules
 coverage
 .git
 .husky
+.next
 build
 .gitignore
 .dockerignore

@@ -1,6 +1,12 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { Button } from '@/components/ui';
+import { addToCart } from '@/features/cart';
+import { useAppDispatch } from '@/store/hooks';
 
 import type { Product } from '../types';
 import { formatPrice } from '../utils';
@@ -10,6 +16,22 @@ interface OrderSummaryBarProps {
 }
 
 export function OrderSummaryBar({ product }: OrderSummaryBarProps) {
+  const dispatch = useAppDispatch();
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsAdding(true);
+    try {
+      await dispatch(addToCart({ id: product.id, quantity: 1 })).unwrap();
+      toast.success('Product added to cart!');
+    } catch {
+      toast.error('Product could not be added to cart.');
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full border-t-[0.5px] border-[#C1C1C1] bg-white">
       <div className="mx-auto flex h-16 max-w-360 items-center justify-between px-4 md:h-20 md:px-8">
@@ -61,7 +83,12 @@ export function OrderSummaryBar({ product }: OrderSummaryBarProps) {
           <span className="font-heading hidden text-[34px] leading-[137.5%] font-medium text-black md:block">
             {formatPrice(product.price)}
           </span>
-          <Button variant="primary" className="h-11 w-30 md:w-37.5">
+          <Button
+            variant="primary"
+            className="h-11 w-30 md:w-37.5"
+            onClick={handleAddToCart}
+            isLoading={isAdding}
+          >
             Add to Cart
           </Button>
         </div>

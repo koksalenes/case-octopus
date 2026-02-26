@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { Logo } from '../../ui/Logo';
 import { AppBarSearch } from './AppBarSearch';
 import { AppBarSkeleton } from './AppBarSkeleton';
+import { CartMenu } from './CartMenu';
 import { UserMenu } from './UserMenu';
 
 export function AppBar() {
@@ -51,7 +52,7 @@ export function AppBar() {
           >
             <button
               type="button"
-              aria-label="Ara"
+              aria-label="Search"
               onClick={() => setSearchOpen(true)}
               className="hover:bg-surface-input focus-visible:ring-primary rounded-lg p-1 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:p-1.5"
             >
@@ -64,23 +65,10 @@ export function AppBar() {
                 priority
               />
             </button>
+            <CartMenu />
             <button
               type="button"
-              aria-label="Bilgi"
-              className="hover:bg-surface-input focus-visible:ring-primary rounded-lg p-1 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:p-1.5"
-            >
-              <Image
-                src="/assets/icons/info-circle.svg"
-                alt=""
-                width={24}
-                height={24}
-                className="size-5 md:size-6"
-                priority
-              />
-            </button>
-            <button
-              type="button"
-              aria-label="Bildirimler"
+              aria-label="Notifications"
               className="hover:bg-surface-input focus-visible:ring-primary rounded-lg p-1 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none md:p-1.5"
             >
               <Image

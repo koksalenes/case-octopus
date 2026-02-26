@@ -2,6 +2,7 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
+import { Toaster } from 'react-hot-toast';
 
 import StoreProvider from '@/store/StoreProvider';
 
@@ -34,7 +35,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${poppins.variable} font-sans antialiased`}
       >
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          {children}
+          <Toaster />
+        </StoreProvider>
       </body>
     </html>
   );
