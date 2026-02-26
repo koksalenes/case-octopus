@@ -33,7 +33,7 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Environment Variables](#environment-variables)
-  - [Running Locally (Without Docker)](#running-locally-without-docker)
+  - [Running Without Docker](#running-without-docker)
   - [Running with Docker](#running-with-docker)
 - [Code Quality](#code-quality)
 - [License](#license)
