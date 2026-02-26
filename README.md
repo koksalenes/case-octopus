@@ -50,6 +50,8 @@
 
 - **Product Detail** — Clicking on any product opens a dedicated detail page displaying all relevant information about that images, description, pricing, and more.
 
+- **Shopping Cart** — Features a simulated shopping cart functionality where users can add products to their cart, view added items, and experience a mock shopping flow.
+
 ---
 
 ## Tech Stack
@@ -73,23 +75,26 @@
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── .../page.tsx         # Login page
-│   ├── globals.css         # Global styles
-├── components/ui/          # Shared reusable UI components (Button, Spinner, etc.)
-├── config/                 # Environment config & validation (Zod schemas)
-├── constants/              # Constants
-├── features/               # Feature-based modules
-│   └── auth/               # Authentication feature
-│       ├── components/     # Login form, hero, password input etc.
-│       ├── constants/      # Auth-specific constants
-│       ├── services/       # Auth API service layer
-│       ├── store/          # Auth Redux slice
-│       └── types/          # Auth TypeScript types
-│   └── .../                # Other features
-├── lib/                    # Core utilities (Axios client, interceptors, serverFetch, logger, token storage etc.)
-├── store/                  # Redux store configuration, hooks, StoreProvider etc.
-└── types/                  # Shared TypeScript types
+├── app/                      # Next.js App Router
+│   ├── .../page.tsx          # Login page
+│   ├── globals.css           # Global styles
+├── components/               # Shared reusable UI components (Button, Spinner, etc.)
+│   ├── ui/                   # UI components
+│   ├── layout/               # Layout components
+├── config/                   # Environment config & validation (Zod schemas)
+├── constants/                # Constants
+├── features/                 # Feature-based modules
+│   └── auth/                 # Authentication feature
+│       ├── components/       # Login form, hero, password input etc.
+│       ├── constants/        # Auth-specific constants
+│       ├── services/         # Auth API service layer
+│       ├── store/            # Auth Redux slice
+│       └── types/            # Auth TypeScript types
+│   └── .../                  # Other features
+├── hooks/                    # Custom hooks
+├── lib/                      # Core utilities (Axios client, interceptors, serverFetch, logger, token storage etc.)
+├── store/                    # Redux store configuration, hooks, StoreProvider etc.
+└── types/                    # Shared TypeScript types
 ```
 
 ---
