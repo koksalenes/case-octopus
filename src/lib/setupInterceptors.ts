@@ -1,22 +1,23 @@
+import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 import { API_ENDPOINTS } from '@/constants';
-import { authService } from '@/features/auth/services/auth.service';
-import { logout, setTokens } from '@/features/auth/store/authSlice';
+import type { AuthState } from '@/features/auth';
+import {
+  logout,
+  refreshToken as refreshTokenThunk,
+} from '@/features/auth/store/authSlice';
 import logger from '@/lib/logger';
 
 import apiClient from './axios';
 
 interface AuthStoreState {
-  auth: {
-    accessToken: string | null;
-    refreshToken: string | null;
-  };
+  auth: AuthState;
 }
 
 interface AppStore {
   getState: () => AuthStoreState;
-  dispatch: (action: unknown) => unknown;
+  dispatch: ThunkDispatch<AuthStoreState, undefined, UnknownAction>;
 }
 
 let isRefreshing = false;
@@ -86,20 +87,17 @@ export function setupInterceptors(store: AppStore) {
     }
 
     try {
-      const response = await authService.refresh({
-        refreshToken,
-      });
+      const result = await store.dispatch(refreshTokenThunk());
 
-      store.dispatch(
-        setTokens({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
-        }),
-      );
+      if (!refreshTokenThunk.fulfilled.match(result)) {
+        throw result.error;
+      }
 
-      processQueue(null, response.accessToken);
+      const { accessToken: newAccessToken } = result.payload;
 
-      originalRequest.headers.Authorization = `Bearer ${response.accessToken}`;
+      processQueue(null, newAccessToken);
+
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       return apiClient(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);

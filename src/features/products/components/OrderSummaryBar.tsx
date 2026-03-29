@@ -33,7 +33,7 @@ export function OrderSummaryBar({ product }: OrderSummaryBarProps) {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 z-50 w-full border-t-[0.5px] border-[#C1C1C1] bg-white">
+    <div className="border-border-medium fixed bottom-0 left-0 z-50 w-full border-t-[0.5px] bg-white">
       <div className="mx-auto flex h-16 max-w-360 items-center justify-between px-4 md:h-20 md:px-8">
         {/* Left section – hidden on mobile, visible on md+ */}
         <div className="hidden min-w-0 flex-1 items-center gap-4 pr-4 md:flex lg:gap-8 lg:pr-8">
@@ -59,7 +59,7 @@ export function OrderSummaryBar({ product }: OrderSummaryBarProps) {
               <span className="font-heading truncate text-lg leading-[137.5%] font-bold text-black">
                 {product.title}
               </span>
-              <span className="font-heading truncate text-base leading-[137.5%] font-normal text-[#888888]">
+              <span className="font-heading text-description truncate text-base leading-[137.5%] font-normal">
                 {product.description.length > 60
                   ? `${product.description.slice(0, 60)}...`
                   : product.description}

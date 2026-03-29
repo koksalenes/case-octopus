@@ -13,7 +13,7 @@ interface PasswordInputProps {
   hasError?: boolean;
 }
 
-export default function PasswordInput({
+export function PasswordInput({
   id,
   name,
   value,

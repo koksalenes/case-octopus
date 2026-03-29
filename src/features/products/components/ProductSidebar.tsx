@@ -2,9 +2,10 @@
 
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui';
+import { useDebouncedCallback } from '@/hooks';
 
 import { useProductsLoading } from './ProductsLoadingContext';
 
@@ -32,7 +33,6 @@ export function ProductSidebar({
   const [search, setSearch] = useState(currentSearch);
   const [selectedCategories, setSelectedCategories] =
     useState<string[]>(currentCategories);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navigate = useCallback(
     (searchValue: string, cats: string[]) => {
@@ -51,11 +51,18 @@ export function ProductSidebar({
     [router, setIsProductsLoading, currentSearchParams],
   );
 
-  const latestDepsRef = useRef({ navigate, selectedCategories, currentSearch });
+  const triggerSearch = useDebouncedCallback(() => {
+    const trimmed = search.trim();
+    if (trimmed.length >= 2) {
+      navigate(search, selectedCategories);
+    } else if (trimmed.length < 2 && currentSearch) {
+      navigate('', selectedCategories);
+    }
+  }, 350);
 
   useEffect(() => {
-    latestDepsRef.current = { navigate, selectedCategories, currentSearch };
-  });
+    triggerSearch();
+  }, [search, triggerSearch]);
 
   function handleFilter() {
     navigate(search, selectedCategories);
@@ -75,32 +82,6 @@ export function ProductSidebar({
   function handleClearSearch() {
     setSearch('');
   }
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    const trimmed = search.trim();
-
-    if (trimmed.length >= 2) {
-      debounceRef.current = setTimeout(() => {
-        latestDepsRef.current.navigate(
-          search,
-          latestDepsRef.current.selectedCategories,
-        );
-      }, 400);
-    } else if (trimmed.length < 2 && latestDepsRef.current.currentSearch) {
-      debounceRef.current = setTimeout(() => {
-        latestDepsRef.current.navigate(
-          '',
-          latestDepsRef.current.selectedCategories,
-        );
-      }, 400);
-    }
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [search]);
 
   return (
     <aside className="flex w-full shrink-0 flex-col gap-4 lg:w-64">

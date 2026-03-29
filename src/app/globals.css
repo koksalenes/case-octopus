@@ -14,6 +14,13 @@
   --color-border-light: #e2e8f0;
   --color-surface-input: #f1f5f9;
   --color-surface-page: #f8fafc;
+  --color-surface-neutral: #f2f2f2;
+  --color-border-medium: #c1c1c1;
+  --color-border-subtle: #e5e5e5;
+  --color-description: #888888;
+  --color-heading-dark: #141a24;
+  --color-selector-inactive: #c0c0c0;
+  --color-category: #626262;
 
   --font-heading: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
 }

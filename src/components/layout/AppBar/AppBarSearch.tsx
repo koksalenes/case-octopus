@@ -3,34 +3,39 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { Button } from '@/components/ui';
-import { API_ENDPOINTS } from '@/constants';
+import { addToCart } from '@/features/cart';
 import {
   formatPrice,
   PRODUCTS_PER_PAGE,
   StarRating,
 } from '@/features/products';
-import type { Product, ProductsResponse } from '@/features/products/types';
-import { useClickOutside } from '@/hooks';
-import apiClient from '@/lib/axios';
+import { searchProducts } from '@/features/products/services';
+import type { Product } from '@/features/products/types';
+import { useClickOutside, useDebounce } from '@/hooks';
+import { useAppDispatch } from '@/store/hooks';
 
 interface AppBarSearchProps {
   onClose: () => void;
 }
 
 export function AppBarSearch({ onClose }: AppBarSearchProps) {
+  const dispatch = useAppDispatch();
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [addingId, setAddingId] = useState<number | null>(null);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const debouncedQuery = useDebounce(query.trim(), 350);
 
   useClickOutside(wrapperRef, onClose);
 
@@ -38,7 +43,7 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
     inputRef.current?.focus();
   }, []);
 
-  const fetchProducts = useCallback(
+  const fetchSearchResults = useCallback(
     async (searchQuery: string, currentSkip: number, append: boolean) => {
       if (!searchQuery.trim()) {
         setProducts([]);
@@ -50,8 +55,10 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
 
       setIsFetching(true);
       try {
-        const { data } = await apiClient.get<ProductsResponse>(
-          `${API_ENDPOINTS.PRODUCTS.SEARCH}?q=${encodeURIComponent(searchQuery.trim())}&limit=${PRODUCTS_PER_PAGE}&skip=${currentSkip}`,
+        const data = await searchProducts(
+          searchQuery.trim(),
+          PRODUCTS_PER_PAGE,
+          currentSkip,
         );
         const newProducts = data.products;
         setProducts((prev) =>
@@ -71,10 +78,7 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
   );
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    const trimmed = query.trim();
-    if (trimmed.length === 0) {
+    if (debouncedQuery.length === 0) {
       setProducts([]);
       setTotal(0);
       setSkip(0);
@@ -83,33 +87,65 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
       return;
     }
 
-    if (trimmed.length < 2) {
+    if (debouncedQuery.length < 2) {
       setIsFetching(false);
       return;
     }
 
-    setIsFetching(true);
     setProducts([]);
     setSkip(0);
+    fetchSearchResults(debouncedQuery, 0, false);
+  }, [debouncedQuery, fetchSearchResults]);
 
-    debounceRef.current = setTimeout(() => {
-      fetchProducts(trimmed, 0, false);
-    }, 350);
+  const scrollStateRef = useRef({
+    isFetching,
+    hasMore,
+    skip,
+    query,
+    fetchSearchResults,
+  });
+  scrollStateRef.current = {
+    isFetching,
+    hasMore,
+    skip,
+    query,
+    fetchSearchResults,
+  };
 
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [query, fetchProducts]);
-
-  const handleScroll = useCallback(() => {
+  useEffect(() => {
     const el = listRef.current;
-    if (!el || isFetching || !hasMore) return;
-    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
-      fetchProducts(query.trim(), skip, true);
-    }
-  }, [isFetching, hasMore, skip, query, fetchProducts]);
+    if (!el) return;
 
-  const showDropdown = query.trim().length >= 2;
+    const handleScroll = () => {
+      const { isFetching, hasMore, skip, query, fetchSearchResults } =
+        scrollStateRef.current;
+      if (isFetching || !hasMore) return;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+        fetchSearchResults(query.trim(), skip, true);
+      }
+    };
+
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleAddToCart = useCallback(
+    async (e: React.MouseEvent, productId: number) => {
+      e.preventDefault();
+      setAddingId(productId);
+      try {
+        await dispatch(addToCart({ id: productId, quantity: 1 })).unwrap();
+        toast.success('Product added to cart!');
+      } catch {
+        toast.error('Product could not be added to cart.');
+      } finally {
+        setAddingId(null);
+      }
+    },
+    [dispatch],
+  );
+
+  const showDropdown = debouncedQuery.length >= 2;
 
   return (
     <div
@@ -157,7 +193,6 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
           {/* Results list */}
           <div
             ref={listRef}
-            onScroll={handleScroll}
             className="max-h-[60vh] overflow-y-auto overscroll-contain md:max-h-120"
           >
             {/* Initial loading skeleton */}
@@ -199,7 +234,7 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
                   className="flex min-w-0 flex-1 items-center gap-3"
                 >
                   {/* Thumbnail */}
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-[#F2F2F2]">
+                  <div className="bg-surface-neutral relative h-16 w-16 shrink-0 overflow-hidden rounded-md">
                     <Image
                       src={product.thumbnail}
                       alt={product.title}
@@ -224,7 +259,13 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
                 </Link>
 
                 {/* Add to cart */}
-                <Button variant="primary" size="sm" className="shrink-0">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={(e) => handleAddToCart(e, product.id)}
+                  isLoading={addingId === product.id}
+                >
                   Add Cart
                 </Button>
               </div>

@@ -33,3 +33,13 @@ export interface RefreshResponse {
   accessToken: string;
   refreshToken: string;
 }
+
+export interface AuthState {
+  user: AuthUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isInitializing: boolean;
+  error: string | null;
+}

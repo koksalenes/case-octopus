@@ -37,7 +37,7 @@ export function ColorSelector({ colors, defaultSelected }: ColorSelectorProps) {
                 'relative flex h-11.25 w-36.25 items-center gap-2 px-5 transition-shadow',
                 isSelected
                   ? 'bg-white shadow-[0px_5px_10px_rgba(0,0,0,0.1)]'
-                  : 'border-[0.5px] border-[#C0C0C0]',
+                  : 'border-selector-inactive border-[0.5px]',
               )}
             >
               <span
@@ -47,14 +47,14 @@ export function ColorSelector({ colors, defaultSelected }: ColorSelectorProps) {
               <span
                 className={cn(
                   'font-heading text-[14.08px] leading-[137.5%]',
-                  isSelected ? 'text-black' : 'text-[#C0C0C0]',
+                  isSelected ? 'text-black' : 'text-selector-inactive',
                 )}
               >
                 {color.name}
               </span>
 
               {isSelected && (
-                <span className="ml-auto flex h-4.75 w-4.75 shrink-0 items-center justify-center rounded-full bg-[#00B512]">
+                <span className="bg-primary ml-auto flex h-4.75 w-4.75 shrink-0 items-center justify-center rounded-full">
                   <Image
                     src="/assets/icons/check.svg"
                     alt="selected"

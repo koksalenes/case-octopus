@@ -41,20 +41,20 @@ export function FeatureSelector({
                 'relative flex h-25 w-full flex-col justify-center px-2.5 py-2.5 text-left transition-shadow',
                 isSelected
                   ? 'bg-white shadow-[0px_5px_10px_rgba(0,0,0,0.1)]'
-                  : 'border-[0.5px] border-[#C0C0C0]',
+                  : 'border-selector-inactive border-[0.5px]',
               )}
             >
               <div className="flex items-center gap-2">
                 <span
                   className={cn(
                     'font-heading text-[14.08px] leading-[137.5%] font-medium',
-                    isSelected ? 'text-black' : 'text-[#8D8D8D]',
+                    isSelected ? 'text-black' : 'text-description',
                   )}
                 >
                   {feature.title}
                 </span>
                 {isSelected && (
-                  <span className="flex h-4.75 w-4.75 shrink-0 items-center justify-center rounded-full bg-[#00B512]">
+                  <span className="bg-primary flex h-4.75 w-4.75 shrink-0 items-center justify-center rounded-full">
                     <Image
                       src="/assets/icons/check.svg"
                       alt="selected"
@@ -68,8 +68,8 @@ export function FeatureSelector({
                 className={cn(
                   'font-heading mt-1 text-[14.08px] font-medium',
                   isSelected
-                    ? 'leading-[105%] text-[#1E1E21]'
-                    : 'leading-[137.5%] text-[#C0C0C0]',
+                    ? 'text-ink leading-[105%]'
+                    : 'text-selector-inactive leading-[137.5%]',
                 )}
               >
                 {feature.description}

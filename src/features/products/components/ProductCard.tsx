@@ -42,7 +42,7 @@ export function ProductCard({ product }: ProductCardProps) {
         className="group flex flex-col gap-4"
       >
         {/* Image container */}
-        <div className="relative h-44 w-full overflow-hidden bg-[#F2F2F2]">
+        <div className="bg-surface-neutral relative h-44 w-full overflow-hidden">
           <Image
             src={product.thumbnail}
             alt={product.title}
@@ -58,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="font-heading truncate text-base font-normal tracking-wide text-black">
             {product.title}
           </p>
-          <p className="font-heading truncate text-base font-normal tracking-wide text-[#626262]">
+          <p className="font-heading text-category truncate text-base font-normal tracking-wide">
             {product.category.charAt(0).toUpperCase() +
               product.category.slice(1)}
           </p>

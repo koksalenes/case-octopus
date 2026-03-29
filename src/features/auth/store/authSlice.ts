@@ -1,29 +1,17 @@
-import {
-  createAsyncThunk,
-  createSlice,
-  type PayloadAction,
-} from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
+import { extractErrorMessage } from '@/lib/extractErrorMessage';
 import { tokenStorage } from '@/lib/tokenStorage';
 
 import { AUTH_ACTIONS, AUTH_SLICE_NAME } from '../constants';
 import { authService } from '../services/auth.service';
 import type {
+  AuthState,
   AuthUser,
   LoginRequest,
   LoginResponse,
   RefreshResponse,
 } from '../types/auth.types';
-
-interface AuthState {
-  user: AuthUser | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  isInitializing: boolean;
-  error: string | null;
-}
 
 const initialState: AuthState = {
   user: null,
@@ -44,26 +32,12 @@ export const login = createAsyncThunk<
     const response = await authService.login(credentials);
     return response;
   } catch (error: unknown) {
-    if (
-      error &&
-      typeof error === 'object' &&
-      'response' in error &&
-      error.response &&
-      typeof error.response === 'object' &&
-      'data' in error.response
-    ) {
-      const axiosError = error as {
-        response: { data: { message?: string } };
-        message: string;
-      };
-      return rejectWithValue(
-        axiosError.response.data.message ?? axiosError.message,
-      );
-    }
-    if (error instanceof Error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('An unexpected error occurred. Please try again.');
+    return rejectWithValue(
+      extractErrorMessage(
+        error,
+        'An unexpected error occurred. Please try again.',
+      ),
+    );
   }
 });
 
@@ -82,26 +56,7 @@ export const refreshToken = createAsyncThunk<
     });
     return response;
   } catch (error: unknown) {
-    if (
-      error &&
-      typeof error === 'object' &&
-      'response' in error &&
-      error.response &&
-      typeof error.response === 'object' &&
-      'data' in error.response
-    ) {
-      const axiosError = error as {
-        response: { data: { message?: string } };
-        message: string;
-      };
-      return rejectWithValue(
-        axiosError.response.data.message ?? axiosError.message,
-      );
-    }
-    if (error instanceof Error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Token refresh failed');
+    return rejectWithValue(extractErrorMessage(error, 'Token refresh failed'));
   }
 });
 
@@ -140,13 +95,6 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
-    },
-    setTokens: (
-      state,
-      action: PayloadAction<{ accessToken: string; refreshToken: string }>,
-    ) => {
-      state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
     },
   },
   extraReducers: (builder) => {
@@ -193,5 +141,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, setTokens } = authSlice.actions;
+export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;

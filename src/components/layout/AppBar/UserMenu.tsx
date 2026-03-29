@@ -106,7 +106,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
               height={20}
               className="size-5"
             />
-            <span>Çıkış Yap</span>
+            <span>Logout</span>
           </button>
         </div>
       )}

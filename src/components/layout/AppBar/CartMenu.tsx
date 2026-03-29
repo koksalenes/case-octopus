@@ -2,12 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { Button } from '@/components/ui';
 import { checkoutCart, fetchCart } from '@/features/cart';
 import { formatPrice } from '@/features/products/utils';
+import { useClickOutside } from '@/hooks';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 export function CartMenu() {
@@ -21,18 +22,8 @@ export function CartMenu() {
     dispatch(fetchCart());
   }, [dispatch]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const handleClose = useCallback(() => setIsOpen(false), []);
+  useClickOutside(dropdownRef, handleClose);
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
@@ -76,7 +67,7 @@ export function CartMenu() {
 
       {/* Cart Dropdown */}
       {isOpen && (
-        <div className="absolute top-full right-0 z-50 mt-2 flex max-h-[80vh] w-80 flex-col rounded-xl border border-[#E5E5E5] bg-white p-4 shadow-xl md:w-96">
+        <div className="border-border-subtle absolute top-full right-0 z-50 mt-2 flex max-h-[80vh] w-80 flex-col rounded-xl border bg-white p-4 shadow-xl md:w-96">
           <h3 className="mb-3 border-b pb-2 text-lg font-bold">
             Cart ({totalDistinctItems} Product)
           </h3>
@@ -94,7 +85,7 @@ export function CartMenu() {
                   key={product.id}
                   className="-mx-1 flex gap-3 rounded border-b p-1 pb-3 transition-colors last:border-0 last:pb-0 hover:bg-gray-50"
                 >
-                  <div className="relative h-16 w-16 shrink-0 rounded bg-[#F2F2F2]">
+                  <div className="bg-surface-neutral relative h-16 w-16 shrink-0 rounded">
                     <Image
                       src={product.thumbnail}
                       alt={product.title}

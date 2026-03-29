@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-export default function LoginHero() {
+export function LoginHero() {
   return (
     <div className="flex flex-col items-center gap-8 px-6 lg:px-10">
       {/* Illustration */}

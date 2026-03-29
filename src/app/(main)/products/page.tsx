@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import {
   fetchCategories,
@@ -16,17 +17,17 @@ export const metadata: Metadata = {
   description: 'Browse and filter all products on Octopus.',
 };
 
-interface ProductsPageProps {
-  searchParams: Promise<{
-    page?: string;
-    search?: string;
-    category?: string;
-  }>;
+interface SearchParams {
+  page?: string;
+  search?: string;
+  category?: string;
 }
 
-export default async function ProductsPage({
-  searchParams,
-}: ProductsPageProps) {
+interface ProductsPageProps {
+  searchParams: Promise<SearchParams>;
+}
+
+async function ProductsContent({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
   const search = params.search ?? '';
@@ -61,7 +62,7 @@ export default async function ProductsPage({
 
           {/* Main content */}
           <ProductContentWrapper dataKey={dataKey}>
-            <h2 className="font-heading text-xl leading-[150%] font-bold text-[#141A24]">
+            <h2 className="font-heading text-heading-dark text-xl leading-[150%] font-bold">
               {productsData.total} products are listed
             </h2>
 
@@ -90,5 +91,13 @@ export default async function ProductsPage({
         </div>
       </div>
     </ProductsLoadingProvider>
+  );
+}
+
+export default function ProductsPage({ searchParams }: ProductsPageProps) {
+  return (
+    <Suspense>
+      <ProductsContent searchParams={searchParams} />
+    </Suspense>
   );
 }

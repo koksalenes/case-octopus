@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { tokenStorage } from '@/lib/tokenStorage';
 import { useAppSelector } from '@/store/hooks';
@@ -13,20 +13,18 @@ export default function AuthLayout({
 }>) {
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [isChecking, setIsChecking] = useState(true);
+
+  const shouldRedirect =
+    isAuthenticated ||
+    (typeof window !== 'undefined' && !!tokenStorage.getRefreshToken());
 
   useEffect(() => {
-    if (isAuthenticated || tokenStorage.getRefreshToken()) {
+    if (shouldRedirect) {
       router.replace('/products');
-    } else {
-      const timer = setTimeout(() => setIsChecking(false), 0);
-      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, router]);
+  }, [shouldRedirect, router]);
 
-  if (isChecking) {
-    return null; // Avoid rendering login screen while checking
-  }
+  if (shouldRedirect) return null;
 
   return children;
 }

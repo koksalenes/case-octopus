@@ -8,11 +8,19 @@ export const tokenStorage = {
 
   setRefreshToken: (token: string): void => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    try {
+      localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    } catch {
+      // localStorage may be unavailable
+    }
   },
 
   clearRefreshToken: (): void => {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    try {
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    } catch {
+      // localStorage may be unavailable
+    }
   },
 };

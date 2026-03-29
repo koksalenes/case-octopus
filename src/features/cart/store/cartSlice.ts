@@ -1,5 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
+import { extractErrorMessage } from '@/lib/extractErrorMessage';
+
 import {
   CART_ACTIONS,
   CART_SLICE_NAME,
@@ -27,26 +29,9 @@ export const fetchCart = createAsyncThunk<Cart, void, { rejectValue: string }>(
       const response = await cartService.getCart();
       return response;
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === 'object' &&
-        'response' in error &&
-        error.response &&
-        typeof error.response === 'object' &&
-        'data' in error.response
-      ) {
-        const axiosError = error as {
-          response: { data: { message?: string } };
-          message: string;
-        };
-        return rejectWithValue(
-          axiosError.response.data.message ?? axiosError.message,
-        );
-      }
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('Failed to fetch cart.');
+      return rejectWithValue(
+        extractErrorMessage(error, 'Failed to fetch cart.'),
+      );
     }
   },
 );
@@ -60,26 +45,9 @@ export const addToCart = createAsyncThunk<
     const response = await cartService.addToCart(payload);
     return response;
   } catch (error: unknown) {
-    if (
-      error &&
-      typeof error === 'object' &&
-      'response' in error &&
-      error.response &&
-      typeof error.response === 'object' &&
-      'data' in error.response
-    ) {
-      const axiosError = error as {
-        response: { data: { message?: string } };
-        message: string;
-      };
-      return rejectWithValue(
-        axiosError.response.data.message ?? axiosError.message,
-      );
-    }
-    if (error instanceof Error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Failed to add to cart.');
+    return rejectWithValue(
+      extractErrorMessage(error, 'Failed to add to cart.'),
+    );
   }
 });
 
@@ -92,26 +60,7 @@ export const checkoutCart = createAsyncThunk<
     const response = await cartService.checkout();
     return response;
   } catch (error: unknown) {
-    if (
-      error &&
-      typeof error === 'object' &&
-      'response' in error &&
-      error.response &&
-      typeof error.response === 'object' &&
-      'data' in error.response
-    ) {
-      const axiosError = error as {
-        response: { data: { message?: string } };
-        message: string;
-      };
-      return rejectWithValue(
-        axiosError.response.data.message ?? axiosError.message,
-      );
-    }
-    if (error instanceof Error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Failed to checkout.');
+    return rejectWithValue(extractErrorMessage(error, 'Failed to checkout.'));
   }
 });
 
@@ -135,16 +84,20 @@ const cartSlice = createSlice({
         state.error = action.payload ?? 'Failed to fetch cart';
       })
       .addCase(addToCart.pending, (state) => {
+        state.status = CART_STATUS.LOADING;
         state.error = null;
       })
       .addCase(addToCart.fulfilled, (state, action) => {
+        state.status = CART_STATUS.SUCCEEDED;
         state.data = action.payload;
         state.error = null;
       })
       .addCase(addToCart.rejected, (state, action) => {
+        state.status = CART_STATUS.FAILED;
         state.error = action.payload ?? 'Failed to add to cart';
       })
       .addCase(checkoutCart.pending, (state) => {
+        state.status = CART_STATUS.LOADING;
         state.error = null;
       })
       .addCase(checkoutCart.fulfilled, (state) => {
@@ -153,6 +106,7 @@ const cartSlice = createSlice({
         state.error = null;
       })
       .addCase(checkoutCart.rejected, (state, action) => {
+        state.status = CART_STATUS.FAILED;
         state.error = action.payload ?? 'Failed to checkout';
       });
   },

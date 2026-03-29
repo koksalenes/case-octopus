@@ -5,18 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui';
+import { credentialStorage } from '@/lib/credentialStorage';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import { clearError, login } from '../store/authSlice';
-import PasswordInput from './PasswordInput';
+import { PasswordInput } from './PasswordInput';
 
-export default function LoginForm() {
+export function LoginForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(
+    () => credentialStorage.get()?.username ?? '',
+  );
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => !!credentialStorage.get());
   const [fieldErrors, setFieldErrors] = useState<{
     username?: string;
     password?: string;
@@ -42,6 +45,11 @@ export default function LoginForm() {
     const result = await dispatch(login({ username, password }));
 
     if (login.fulfilled.match(result)) {
+      if (rememberMe) {
+        credentialStorage.save(username.trim());
+      } else {
+        credentialStorage.clear();
+      }
       router.push('/products');
     }
   };

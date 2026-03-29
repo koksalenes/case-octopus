@@ -1,5 +1,6 @@
 import { env } from '@/config';
 import { API_ENDPOINTS } from '@/constants';
+import apiClient from '@/lib/axios';
 import { serverFetch } from '@/lib/serverFetch';
 
 import { CACHE_OPTIONS, PRODUCTS_PER_PAGE } from '../constants';
@@ -95,4 +96,15 @@ export async function fetchCategories(): Promise<string[]> {
     `${env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.PRODUCTS.CATEGORY_LIST}`,
     CACHE_OPTIONS,
   );
+}
+
+export async function searchProducts(
+  query: string,
+  limit: number,
+  skip: number,
+): Promise<ProductsResponse> {
+  const { data } = await apiClient.get<ProductsResponse>(
+    `${API_ENDPOINTS.PRODUCTS.SEARCH}?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`,
+  );
+  return data;
 }

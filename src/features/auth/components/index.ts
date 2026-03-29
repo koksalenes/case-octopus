@@ -1,3 +1,3 @@
-export { default as LoginForm } from './LoginForm';
-export { default as LoginHero } from './LoginHero';
-export { default as PasswordInput } from './PasswordInput';
+export { LoginForm } from './LoginForm';
+export { LoginHero } from './LoginHero';
+export { PasswordInput } from './PasswordInput';

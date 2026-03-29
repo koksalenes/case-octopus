@@ -49,7 +49,7 @@ function ReviewItem({ review }: { review: ProductReview }) {
           {expanded && isOverflowing && (
             <button
               onClick={() => setExpanded(false)}
-              className="ml-2 inline-block font-sans text-[18px] leading-[150%] font-normal whitespace-nowrap text-[#00B512] hover:underline"
+              className="text-primary ml-2 inline-block font-sans text-[18px] leading-[150%] font-normal whitespace-nowrap hover:underline"
             >
               show less
             </button>
@@ -65,7 +65,7 @@ function ReviewItem({ review }: { review: ProductReview }) {
               </span>
               <button
                 onClick={() => setExpanded(true)}
-                className="ml-1 font-sans text-[18px] leading-[150%] font-normal whitespace-nowrap text-[#00B512] hover:underline"
+                className="text-primary ml-1 font-sans text-[18px] leading-[150%] font-normal whitespace-nowrap hover:underline"
               >
                 show more
               </button>
@@ -91,13 +91,15 @@ export function ProductReviews({ reviews }: ProductReviewsProps) {
   return (
     <div className="flex w-full flex-col gap-4">
       <h3 className="font-heading text-base leading-[137.5%] font-bold text-black">
-        Ürün Yorumları
+        Product Reviews
       </h3>
 
       <div className="flex flex-col gap-6">
         {visibleReviews.map((review, index) => (
           <div key={review.reviewerEmail + review.date}>
-            {index > 0 && <div className="mb-6 border-t border-[#E8E8E8]" />}
+            {index > 0 && (
+              <div className="border-border-subtle mb-6 border-t" />
+            )}
             <ReviewItem review={review} />
           </div>
         ))}

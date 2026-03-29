@@ -21,7 +21,7 @@ export function ProductImageGallery({
   return (
     <div className="flex w-full flex-col gap-5 lg:max-w-117.75">
       {/* Main image */}
-      <div className="relative flex h-87.5 w-full items-center justify-center bg-[#F2F2F2] sm:h-112.5 lg:h-146.75">
+      <div className="bg-surface-neutral relative flex h-87.5 w-full items-center justify-center sm:h-112.5 lg:h-146.75">
         <div className="relative h-3/4 w-3/4 max-w-40.75 sm:w-1/2 lg:h-125.75 lg:w-2/5">
           <Image
             src={displayImages[selectedIndex]}
