@@ -1,8 +1,11 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui';
 import { credentialStorage } from '@/lib/credentialStorage';
@@ -11,42 +14,40 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { clearError, login } from '../store/authSlice';
 import { PasswordInput } from './PasswordInput';
 
+const loginSchema = z.object({
+  username: z.string().min(1, 'Username is required.'),
+  password: z.string().min(1, 'Password is required.'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 export function LoginForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
-  const [username, setUsername] = useState(
-    () => credentialStorage.get()?.username ?? '',
-  );
-  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(() => !!credentialStorage.get());
-  const [fieldErrors, setFieldErrors] = useState<{
-    username?: string;
-    password?: string;
-  }>({});
 
-  const validate = () => {
-    const errors: { username?: string; password?: string } = {};
-    if (!username.trim()) errors.username = 'Username is required.';
-    if (!password) errors.password = 'Password is required.';
-    return errors;
-  };
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: credentialStorage.get()?.username ?? '',
+      password: '',
+    },
+  });
 
-  const handleSubmit = async (e: React.BaseSyntheticEvent) => {
-    e.preventDefault();
-    const errors = validate();
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      return;
-    }
-    setFieldErrors({});
+  const onSubmit = async (data: LoginFormValues) => {
     dispatch(clearError());
 
-    const result = await dispatch(login({ username, password }));
+    const result = await dispatch(login(data));
 
     if (login.fulfilled.match(result)) {
       if (rememberMe) {
-        credentialStorage.save(username.trim());
+        credentialStorage.save(data.username.trim());
       } else {
         credentialStorage.clear();
       }
@@ -56,17 +57,18 @@ export function LoginForm() {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="flex w-full max-w-108 flex-col gap-4"
     >
-      {/* Error message */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+        >
           {error}
         </div>
       )}
 
-      {/* Username field */}
       <div className="flex flex-col gap-2">
         <label
           htmlFor="username"
@@ -76,26 +78,21 @@ export function LoginForm() {
         </label>
         <input
           id="username"
-          name="username"
           type="text"
-          value={username}
-          onChange={(e) => {
-            setUsername(e.target.value);
-            if (fieldErrors.username)
-              setFieldErrors((prev) => ({ ...prev, username: undefined }));
-          }}
+          {...register('username')}
           placeholder="Enter your username"
           disabled={isLoading}
           className={`bg-surface-input text-ink placeholder-ink-subtle focus:border-primary h-11 w-full rounded-lg px-4 py-3 text-sm leading-5 font-normal outline-none focus:border ${
-            fieldErrors.username ? 'border border-red-500' : ''
+            errors.username ? 'border border-red-500' : ''
           }`}
         />
-        {fieldErrors.username && (
-          <p className="text-xs text-red-500">{fieldErrors.username}</p>
+        {errors.username && (
+          <p id="username-error" className="text-xs text-red-500">
+            {errors.username.message}
+          </p>
         )}
       </div>
 
-      {/* Password field */}
       <div className="flex flex-col gap-2">
         <label
           htmlFor="password"
@@ -103,29 +100,34 @@ export function LoginForm() {
         >
           Password<span className="text-red-500">*</span>
         </label>
-        <PasswordInput
-          id="password"
+        <Controller
+          control={control}
           name="password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (fieldErrors.password)
-              setFieldErrors((prev) => ({ ...prev, password: undefined }));
-          }}
-          placeholder="Enter your password"
-          disabled={isLoading}
-          hasError={!!fieldErrors.password}
+          render={({ field }) => (
+            <PasswordInput
+              id="password"
+              name={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              ariaLabel="Enter Your Password"
+              placeholder="Enter your password"
+              disabled={isLoading}
+              hasError={!!errors.password}
+            />
+          )}
         />
-        {fieldErrors.password && (
-          <p className="text-xs text-red-500">{fieldErrors.password}</p>
+        {errors.password && (
+          <p id="password-error" className="text-xs text-red-500">
+            {errors.password.message}
+          </p>
         )}
       </div>
 
-      {/* Remember me */}
       <div className="flex items-center gap-2">
         <button
           type="button"
           role="checkbox"
+          aria-label="Remember me"
           aria-checked={rememberMe}
           onClick={() => setRememberMe(!rememberMe)}
           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
@@ -146,7 +148,6 @@ export function LoginForm() {
         <span className="text-ink text-sm leading-3.5">Remember me?</span>
       </div>
 
-      {/* Login button */}
       <Button type="submit" isLoading={isLoading} fullWidth>
         Login
       </Button>

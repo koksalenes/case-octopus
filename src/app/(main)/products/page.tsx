@@ -10,6 +10,7 @@ import {
   PRODUCTS_PER_PAGE,
   ProductSidebar,
   ProductsLoadingProvider,
+  ProductsSkeleton,
 } from '@/features/products';
 
 export const metadata: Metadata = {
@@ -96,7 +97,7 @@ async function ProductsContent({ searchParams }: ProductsPageProps) {
 
 export default function ProductsPage({ searchParams }: ProductsPageProps) {
   return (
-    <Suspense>
+    <Suspense fallback={<ProductsSkeleton />}>
       <ProductsContent searchParams={searchParams} />
     </Suspense>
   );

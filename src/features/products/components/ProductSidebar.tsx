@@ -96,6 +96,7 @@ export function ProductSidebar({
         />
         <input
           type="text"
+          aria-label="Quick search"
           placeholder="Quick Search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -147,6 +148,7 @@ export function ProductSidebar({
             >
               <span
                 role="checkbox"
+                aria-label={formatCategoryName(cat)}
                 aria-checked={selectedCategories.includes(cat)}
                 tabIndex={0}
                 onClick={() => handleCategoryToggle(cat)}

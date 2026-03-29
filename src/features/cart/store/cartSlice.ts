@@ -8,13 +8,7 @@ import {
   CART_STATUS,
 } from '../constants/cart.constants';
 import { cartService } from '../services';
-import type { Cart, CartStatus } from '../types/cart.types';
-
-interface CartState {
-  data: Cart | null;
-  status: CartStatus;
-  error: string | null;
-}
+import type { Cart, CartState } from '../types/cart.types';
 
 const initialState: CartState = {
   data: null,

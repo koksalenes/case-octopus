@@ -48,7 +48,7 @@ export function ProductImageGallery({
                     fill
                     sizes="(max-width: 768px) 80vw, 471px"
                     className="object-contain"
-                    priority
+                    loading="eager"
                   />
                 </div>
               </div>

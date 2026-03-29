@@ -35,6 +35,9 @@
   - [Environment Variables](#environment-variables)
   - [Running Without Docker](#running-without-docker)
   - [Running with Docker](#running-with-docker)
+- [Testing](#testing)
+  - [Unit & Integration Tests](#unit--integration-tests)
+  - [End-to-End Tests](#end-to-end-tests)
 - [Code Quality](#code-quality)
 - [License](#license)
 
@@ -88,25 +91,52 @@
 ```
 src/
 ├── app/                      # Next.js App Router
-│   ├── .../page.tsx          # Login page
-│   ├── globals.css           # Global styles
-├── components/               # Shared reusable UI components (Button, Spinner, etc.)
-│   ├── ui/                   # UI components
-│   ├── layout/               # Layout components
+│   ├── (auth)/               # Auth route group
+│   │   ├── layout.tsx        # Auth layout
+│   │   └── auth/login/       # Login page
+│   │       └── page.tsx
+│   ├── (main)/               # Main route group
+│   │   ├── layout.tsx        # Main layout
+│   │   └── products/         # Products pages
+│   │       ├── page.tsx      # Product listing page
+│   │       ├── error.tsx     # Error boundary
+│   │       └── [id]/         # Dynamic product detail
+│   │           └── page.tsx
+│   ├── layout.tsx            # Root layout
+│   ├── page.tsx              # Root page (redirect)
+│   └── globals.css           # Global styles
+├── components/               # Shared reusable UI components
+│   ├── ui/                   # UI components (Button, Spinner, Logo etc.)
+│   └── layout/               # Layout components (AppBar etc.)
 ├── config/                   # Environment config & validation (Zod schemas)
-├── constants/                # Constants
+├── constants/                # App-wide constants & API endpoint constants
 ├── features/                 # Feature-based modules
-│   └── auth/                 # Authentication feature
-│       ├── components/       # Login form, hero, password input etc.
-│       ├── constants/        # Auth-specific constants
-│       ├── services/         # Auth API service layer
-│       ├── store/            # Auth Redux slice
-│       └── types/            # Auth TypeScript types
-│   └── .../                  # Other features
-├── hooks/                    # Custom hooks
+│   ├── auth/                 # Authentication feature
+│   │   ├── components/       # Login form, hero, password input etc.
+│   │   ├── constants/        # Auth-specific constants
+│   │   ├── services/         # Auth API service layer
+│   │   ├── store/            # Auth Redux slice
+│   │   └── types/            # Auth TypeScript types
+│   ├── cart/                 # Shopping cart feature
+│   │   ├── constants/        # Cart-specific constants
+│   │   ├── services/         # Cart API service layer
+│   │   ├── store/            # Cart Redux slice
+│   │   └── types/            # Cart TypeScript types
+│   └── products/             # Products feature
+│       ├── components/       # Product card, filters, search etc.
+│       ├── constants/        # Product-specific constants
+│       ├── services/         # Product API service layer
+│       ├── types/            # Product TypeScript types
+│       └── utils/            # Product utility functions
+├── hooks/                    # Custom hooks (useDebounce, useClickOutside, useDebouncedCallback)
 ├── lib/                      # Core utilities (Axios client, interceptors, serverFetch, logger, token storage etc.)
-├── store/                    # Redux store configuration, hooks, StoreProvider etc.
+├── store/                    # Redux store configuration, hooks, StoreProvider
+├── test/                     # Test utilities, setup & MSW mocks
 └── types/                    # Shared TypeScript types
+tests/                        # Playwright E2E tests
+├── login.spec.ts
+├── products.spec.ts
+└── cart.spec.ts
 ```
 
 ---
@@ -115,7 +145,7 @@ src/
 
 > 1- Normally, the Figma design submitted for the case study retrieves the email address, but since the dummyjson API uses a username for login, I changed this part from email address to username.
 
-> 2- Because the CORS setting is set to "\*" for public access to the dummyjson API, requests cannot be made with credentials = true. The API side also cannot add the cookie using `set-cookie` for this reason. Normally, the refresh token should be stored in a cookie for security reasons, but since we don't have backend control, we can't change the CORS setting, so I stored the refresh token on local storage.
+> 2- Because the CORS setting is set to "\*" for public access to the dummyjson API, requests cannot be made with credentials = true. The API side also cannot add the cookie using `set-cookie` for this reason. Normally, the refresh token and username should be stored in a cookie for security reasons, but since we don't have backend control, we can't change the CORS setting, so I stored the refresh token on local storage.
 
 > 3- Two HTTP mechanisms are used intentionally. **Axios** (`src/lib/axios.ts`) handles all client-side requests and provides request/response interceptors, automatic auth-header injection, and silent token refresh on 401. **Native `fetch`** is used in server-side (RSC) service files via the `src/lib/serverFetch.ts` wrapper because Axios does not support Next.js's extended `fetch` options (`next.revalidate`, `next.tags`) required for ISR/RSC caching. Raw `fetch` calls are never left inline — `serverFetch` centralises error handling and cache configuration.
 
@@ -149,6 +179,13 @@ cd case-octopus
 
 Create a `.env.local` file in the project root and copy the contents of `.env.example`.
 If you need to make changes to the environment variables, do so.
+
+| Variable              | Description          | Example                     |
+| --------------------- | -------------------- | --------------------------- |
+| `NEXT_PUBLIC_API_URL` | API base URL         | `https://dummyjson.com`     |
+| `NEXT_PUBLIC_CDN_URL` | CDN base URL         | `https://cdn.dummyjson.com` |
+| `BASE_URL`            | Application base URL | `http://localhost:3000`     |
+| `CI`                  | CI environment flag  | `false`                     |
 
 > Environment variables are validated at startup via Zod. The app will fail fast with descriptive error messages if any required variable is missing or invalid.
 
@@ -215,13 +252,62 @@ The app will be available at **http://localhost:3000**.
 
 ---
 
+## Testing
+
+The project includes both **unit/integration tests** (Vitest + React Testing Library) and **end-to-end tests** (Playwright).
+
+### Unit & Integration Tests
+
+Unit and integration tests are co-located with the source files using the `*.test.ts` naming convention. They cover:
+
+| Area              | Location                       | Description                                                                                  |
+| ----------------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
+| **Hooks**         | `src/hooks/*.test.ts`          | `useDebounce`, `useClickOutside`, `useDebouncedCallback`                                     |
+| **Lib Utilities** | `src/lib/*.test.ts`            | Axios interceptors, token storage, credential storage, serverFetch, logger, error extraction |
+| **Components**    | `src/components/**/*.test.tsx` | Shared UI component tests                                                                    |
+
+- **Test runner:** [Vitest](https://vitest.dev/) with jsdom environment
+- **Utilities:** React Testing Library, MSW (Mock Service Worker) for API mocking
+- **Setup:** `src/test/setup.ts` (global setup), `src/test/render-utils.tsx` (custom render with providers), `src/test/mocks/` (MSW handlers)
+
+```bash
+# Run all unit/integration tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+### End-to-End Tests
+
+E2E tests are located in the `tests/` directory and cover full user flows:
+
+| Test File                | Description                                    |
+| ------------------------ | ---------------------------------------------- |
+| `tests/login.spec.ts`    | Login flow & session management                |
+| `tests/products.spec.ts` | Product listing, filtering & detail navigation |
+| `tests/cart.spec.ts`     | Cart add/remove & mock shopping flow           |
+
+```bash
+# Run all E2E tests (headless)
+npm run test:e2e
+
+# Run E2E tests with interactive UI
+npm run test:e2e:ui
+```
+
+---
+
 ## Code Quality
 
 This project enforces strict code quality standards through an automated toolchain:
 
 - **ESLint** — Configured with Next.js Core Web Vitals, TypeScript, and Prettier compatibility rules.
 - **Prettier** — Automatic code formatting with Tailwind CSS class sorting plugin.
-- **Husky + lint-staged** — Pre-commit hooks that lint and format staged files automatically.
+- **Husky + lint-staged** — Pre-commit hooks that lint, format, and run tests on staged files automatically.
 - **Commitlint** — Enforces conventional commits specification on every commit message.
 
 ---

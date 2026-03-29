@@ -8,7 +8,8 @@ interface PasswordInputProps {
   name: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
+  ariaLabel: string;
+  placeholder: string;
   disabled?: boolean;
   hasError?: boolean;
 }
@@ -18,7 +19,8 @@ export function PasswordInput({
   name,
   value,
   onChange,
-  placeholder = 'Enter your password',
+  ariaLabel,
+  placeholder,
   disabled = false,
   hasError = false,
 }: PasswordInputProps) {
@@ -32,6 +34,7 @@ export function PasswordInput({
         type={showPassword ? 'text' : 'password'}
         value={value}
         onChange={onChange}
+        aria-label={ariaLabel}
         placeholder={placeholder}
         disabled={disabled}
         className={`bg-surface-input text-ink placeholder-ink-subtle focus:border-primary h-11 w-full rounded-lg px-4 py-3 text-sm leading-5 font-normal outline-none focus:border ${hasError ? 'border border-red-500' : ''}`}

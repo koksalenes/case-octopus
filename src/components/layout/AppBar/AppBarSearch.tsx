@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { Button } from '@/components/ui';
-import { addToCart } from '@/features/cart';
 import {
   formatPrice,
   PRODUCTS_PER_PAGE,
@@ -14,26 +13,26 @@ import {
 } from '@/features/products';
 import { searchProducts } from '@/features/products/services';
 import type { Product } from '@/features/products/types';
-import { useClickOutside, useDebounce } from '@/hooks';
-import { useAppDispatch } from '@/store/hooks';
+import { useAddToCart, useClickOutside, useDebounce } from '@/hooks';
 
 interface AppBarSearchProps {
   onClose: () => void;
 }
 
 export function AppBarSearch({ onClose }: AppBarSearchProps) {
-  const dispatch = useAppDispatch();
+  const { add, isAdding } = useAddToCart();
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [addingId, setAddingId] = useState<number | null>(null);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const debouncedQuery = useDebounce(query.trim(), 350);
 
@@ -43,55 +42,55 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+
   const fetchSearchResults = useCallback(
     async (searchQuery: string, currentSkip: number, append: boolean) => {
-      if (!searchQuery.trim()) {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      const trimmed = searchQuery.trim();
+      if (trimmed.length < 2) {
         setProducts([]);
         setTotal(0);
         setSkip(0);
         setHasMore(false);
+        setIsFetching(false);
         return;
       }
 
       setIsFetching(true);
       try {
         const data = await searchProducts(
-          searchQuery.trim(),
+          trimmed,
           PRODUCTS_PER_PAGE,
           currentSkip,
+          controller.signal,
         );
-        const newProducts = data.products;
+
+        if (controller.signal.aborted) return;
+
         setProducts((prev) =>
-          append ? [...prev, ...newProducts] : newProducts,
+          append ? [...prev, ...data.products] : data.products,
         );
         setTotal(data.total);
-        const loaded = currentSkip + newProducts.length;
+        const loaded = currentSkip + data.products.length;
         setSkip(loaded);
         setHasMore(loaded < data.total);
       } catch {
-        // silently ignore errors
+        if (controller.signal.aborted) return;
+        toast.error('Something went wrong. Please try again.');
       } finally {
-        setIsFetching(false);
+        if (!controller.signal.aborted) setIsFetching(false);
       }
     },
     [],
   );
 
   useEffect(() => {
-    if (debouncedQuery.length === 0) {
-      setProducts([]);
-      setTotal(0);
-      setSkip(0);
-      setHasMore(false);
-      setIsFetching(false);
-      return;
-    }
-
-    if (debouncedQuery.length < 2) {
-      setIsFetching(false);
-      return;
-    }
-
     setProducts([]);
     setSkip(0);
     fetchSearchResults(debouncedQuery, 0, false);
@@ -101,51 +100,51 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
     isFetching,
     hasMore,
     skip,
-    query,
+    debouncedQuery,
     fetchSearchResults,
   });
   scrollStateRef.current = {
     isFetching,
     hasMore,
     skip,
-    query,
+    debouncedQuery,
     fetchSearchResults,
   };
 
+  const showDropdown = debouncedQuery.length >= 2;
+
   useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
+    if (!showDropdown) return;
+    const sentinel = sentinelRef.current;
+    const list = listRef.current;
+    if (!sentinel || !list) return;
 
-    const handleScroll = () => {
-      const { isFetching, hasMore, skip, query, fetchSearchResults } =
-        scrollStateRef.current;
-      if (isFetching || !hasMore) return;
-      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
-        fetchSearchResults(query.trim(), skip, true);
-      }
-    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const {
+          isFetching,
+          hasMore,
+          skip,
+          debouncedQuery,
+          fetchSearchResults,
+        } = scrollStateRef.current;
+        if (!entry.isIntersecting || isFetching || !hasMore) return;
+        fetchSearchResults(debouncedQuery, skip, true);
+      },
+      { root: list, rootMargin: '0px 0px 40px 0px', threshold: 0 },
+    );
 
-    el.addEventListener('scroll', handleScroll, { passive: true });
-    return () => el.removeEventListener('scroll', handleScroll);
-  }, []);
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [showDropdown]);
 
   const handleAddToCart = useCallback(
     async (e: React.MouseEvent, productId: number) => {
       e.preventDefault();
-      setAddingId(productId);
-      try {
-        await dispatch(addToCart({ id: productId, quantity: 1 })).unwrap();
-        toast.success('Product added to cart!');
-      } catch {
-        toast.error('Product could not be added to cart.');
-      } finally {
-        setAddingId(null);
-      }
+      await add(productId);
     },
-    [dispatch],
+    [add],
   );
-
-  const showDropdown = debouncedQuery.length >= 2;
 
   return (
     <div
@@ -167,6 +166,7 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Escape' && onClose()}
+          aria-label="Search products"
           placeholder="Search products…"
           className="text-ink placeholder:text-ink-subtle min-w-0 flex-1 bg-transparent text-sm outline-none"
         />
@@ -201,6 +201,7 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
                 {(['sk-a', 'sk-b', 'sk-c'] as const).map((key) => (
                   <div
                     key={key}
+                    data-testid="product-skeleton"
                     className="border-border-light flex items-center gap-3 border-b px-4 py-3 last:border-b-0"
                   >
                     <div className="h-16 w-16 shrink-0 animate-pulse rounded-md bg-gray-200" />
@@ -264,7 +265,7 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
                   size="sm"
                   className="shrink-0"
                   onClick={(e) => handleAddToCart(e, product.id)}
-                  isLoading={addingId === product.id}
+                  isLoading={isAdding(product.id)}
                 >
                   Add Cart
                 </Button>
@@ -277,6 +278,8 @@ export function AppBarSearch({ onClose }: AppBarSearchProps) {
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-black border-t-transparent" />
               </div>
             )}
+
+            <div ref={sentinelRef} aria-hidden="true" />
           </div>
 
           {/* Footer count */}

@@ -102,9 +102,11 @@ export async function searchProducts(
   query: string,
   limit: number,
   skip: number,
+  signal?: AbortSignal,
 ): Promise<ProductsResponse> {
   const { data } = await apiClient.get<ProductsResponse>(
     `${API_ENDPOINTS.PRODUCTS.SEARCH}?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`,
+    { signal },
   );
   return data;
 }

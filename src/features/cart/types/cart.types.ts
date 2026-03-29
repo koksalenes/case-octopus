@@ -22,3 +22,9 @@ export interface Cart {
 }
 
 export type CartStatus = (typeof CART_STATUS)[keyof typeof CART_STATUS];
+
+export interface CartState {
+  data: Cart | null;
+  status: CartStatus;
+  error: string | null;
+}

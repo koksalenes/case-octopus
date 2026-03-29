@@ -2,12 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { Button } from '@/components/ui';
-import { addToCart } from '@/features/cart';
-import { useAppDispatch } from '@/store/hooks';
+import { useAddToCart } from '@/hooks';
 
 import type { Product } from '../types';
 import { formatPrice } from '../utils';
@@ -18,20 +15,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const dispatch = useAppDispatch();
-  const [isAdding, setIsAdding] = useState(false);
+  const { add, isAdding } = useAddToCart();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsAdding(true);
-    try {
-      await dispatch(addToCart({ id: product.id, quantity: 1 })).unwrap();
-      toast.success('Product added to cart!');
-    } catch {
-      toast.error('Product could not be added to cart.');
-    } finally {
-      setIsAdding(false);
-    }
+    await add(product.id);
   };
 
   return (
@@ -74,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
         variant="primary"
         fullWidth
         onClick={handleAddToCart}
-        isLoading={isAdding}
+        isLoading={isAdding(product.id)}
       >
         Add Cart
       </Button>

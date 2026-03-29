@@ -1,6 +1,13 @@
-import type { AxiosError } from 'axios';
+import axios from 'axios';
 
 export function extractErrorMessage(error: unknown, fallback: string): string {
-  const axiosError = error as AxiosError<{ message?: string }>;
-  return axiosError?.response?.data?.message ?? axiosError?.message ?? fallback;
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    return error.response?.data?.message || error.message || fallback;
+  }
+
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+
+  return fallback;
 }
