@@ -294,10 +294,12 @@ E2E tests are located in the `tests/` directory and cover full user flows:
 ```bash
 # Run all E2E tests (headless)
 npx playwright install # Install chromium, firefox and safari(webkit) for e2e test
+npx playwright install-deps # If use linux, run this command
 npm run test:e2e
 
 # Run E2E tests with interactive UI
 npx playwright install # Install chromium, firefox and safari(webkit) for e2e test
+npx playwright install-deps # If use linux, run this command
 npm run test:e2e:ui
 ```
 
